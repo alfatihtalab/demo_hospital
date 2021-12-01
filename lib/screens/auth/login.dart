@@ -1,178 +1,146 @@
-import 'dart:async';
-
-import 'package:demo_hospital/screens/auth/forget.dart';
+import 'package:demo_hospital/api/services/user_auth.dart';
+import 'package:demo_hospital/components/input_decoration_text_auth.dart';
+import 'package:demo_hospital/models/user.dart';
 import 'package:demo_hospital/screens/auth/register.dart';
-import 'package:demo_hospital/screens/home/home_dashboard.dart';
 import 'package:flutter/material.dart';
 
-import '../../utilits.dart';
+import '../../app_theme.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  TextEditingController username = TextEditingController();
+
+  TextEditingController password = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+  var currentFocus;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('صفحة الدخول'),
-        centerTitle: true,
-      ),
-      body: const Center(child: LoginForm()),
-    );
-  }
-}
-
-class LoginForm extends StatefulWidget {
-  const LoginForm({Key? key}) : super(key: key);
-
-  @override
-  _LoginFormState createState() => _LoginFormState();
-}
-
-class _LoginFormState extends State<LoginForm> {
-  final _formKey = GlobalKey<FormState>();
-  final KtextFieldColor = Colors.purple.shade50;
-  var indicatorValue = 0.1;
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // Add TextFormFields and ElevatedButton here.
-              TextFormField(
-                style: TextStyle(fontSize: 14),
-                keyboardType: TextInputType.emailAddress,
-                textDirection: TextDirection.rtl,
-                decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.email),
-                    filled: true,
-                    fillColor: KtextFieldColor,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(50.0))),
-                    hintText: 'البريد الإلكتروني',
-                    hintTextDirection: TextDirection.rtl),
-                // The validator receives the text that the user has entered.
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter some text';
-                  }
-                  return null;
-                },
-              ),
-
-              SizedBox(
-                height: 10.0,
-              ),
-              TextFormField(
-                style: TextStyle(fontSize: 13),
-                textDirection: TextDirection.rtl,
-                decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.vpn_key),
-                    filled: true,
-                    fillColor: KtextFieldColor,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(50.0))),
-                    hintText: 'كلمة المرور',
-                    hintTextDirection: TextDirection.rtl),
-                // The validator receives the text that the user has entered.
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter some text';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-              SizedBox(
-                height: 15.0,
-              ),
-              ElevatedButton(
-                  style: kButtonStyle,
-                  onPressed: () {
-                    _checkFakeUser();
-                    _GoToHomePage();
-                  },
-                  child: const Text(
-                    'دخول',
-                    style: kButtonTextStyle,
-                  )),
-              SizedBox(
-                height: 15.0,
-              ),
-              ElevatedButton(
-                  style: kButtonStyle,
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => RegisterPage()));
-                  },
-                  child: const Text(
-                    'مستخدم جديد قم بالتسجيل هنا',
-                    style: kButtonTextStyle,
-                  )),
-
-              SizedBox(
-                height: 15.0,
-              ),
-              Row(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ForgetPage()));
-                      },
-                      child: const Text(
-                        'إضغط هنا',
-                        style: TextStyle(fontSize: 18.0),
-                      )),
-                  const Text(
-                    'نسيت كلمة المرور',
-                    style: TextStyle(fontSize: 18.0),
-                    textAlign: TextAlign.right,
+                  const CircleAvatar(
+                    radius: 70,
+                    //backgroundImage: AssetImage('assets/main_logo.jpeg'),
                   ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(bottom: 15, left: 10, right: 10),
+                    child: TextFormField(
+                      controller: username,
+                      decoration: buildInputDecoration(
+                          icon: Icons.account_circle, hintText: 'username'),
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter username';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(bottom: 15, left: 10, right: 10),
+                    child: TextFormField(
+                      controller: password,
+                      keyboardType: TextInputType.text,
+                      obscureText: true,
+                      decoration: buildInputDecoration(
+                          icon: Icons.vpn_key_rounded, hintText: 'password'),
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter password';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(bottom: 15, left: 10, right: 10),
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            // If the form is valid, display a snackbar. In the real world,
+                            // you'd often call a server or save the information in a database.
+                            // Scaffold.of(context).showSnackBar(const SnackBar(
+                            //     content: Text('Processing Data')));
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            // await Future.delayed(const Duration(seconds: 3));
+                            var user = UserLogin(
+                                userName: username.text,
+                                password: password.text);
+                            UserSession.userLogin(user, onSuccessful: () {
+                              print('Logged in');
+                            });
+                            // print(user.toJson());
+                          }
+                          ;
+                        },
+                        child: const Text('login')),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(bottom: 15, left: 10, right: 10),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return const RegisterPage();
+                          }));
+                        },
+                        child: const Text('register now here')),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(bottom: 15, left: 10, right: 10),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Can't remeber your account?",
+                            style: DemoTheme.lightTextTheme.headline3,
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text(
+                              'click here',
+                              style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.purple),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
-              SizedBox(
-                height: 15.0,
-              ),
-              LinearProgressIndicator(
-                value: indicatorValue,
-              )
-            ],
+            ),
           ),
         ),
       ),
     );
   }
-
-  void _checkFakeUser() async {
-    setState(() {
-      indicatorValue = 0.2;
-    });
-    await Future.delayed(Duration(seconds: 3));
-    setState(() {
-      indicatorValue = 0.6;
-    });
-    await Future.delayed(Duration(seconds: 3));
-    setState(() {
-      indicatorValue = 1;
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return DashboardPage();
-      }));
-    });
-  }
 }
-
-void _GoToHomePage() {}

@@ -1,11 +1,8 @@
-import 'package:demo_hospital/models/user.dart';
+import 'package:demo_hospital/api/services/user_auth.dart';
 import 'package:demo_hospital/screens/auth/login.dart';
 import 'package:demo_hospital/screens/home/home_dashboard.dart';
-import 'package:demo_hospital/services/user_auth.dart';
-import 'package:demo_hospital/utilits.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
       ),
-      home: const LoginPage(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -42,16 +39,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  final UserSession _userSession = UserSession(url: mURL);
-  User user = User(
-      email: 'alfatih@example.com',
-      fulllName: 'alfatih',
-      password: 'Az123456789',
-      mobile: '09123456789',
-      userType: 'string',
-      requestType: 'string',
-      organizationId: 0);
+  // final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  //final UserSession _userSession = UserSession(url: mURL);
+
   @override
   void initState() {
     // TODO: implement initState
@@ -60,25 +50,41 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> getCurrentUser() async {
-    _userSession.userLogin(user, onSuccessful: () {
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return const DashboardPage();
-      }));
-    });
+    // _userSession.userLogin(user, onSuccessful: () {
+    //   Navigator.push(context, MaterialPageRoute(builder: (context) {
+    //     return const DashboardPage();
+    //   }));
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Image(
-            width: 250,
-            height: 400,
-            image: AssetImage('assets/doctor_t.png'),
-          ),
-        ),
-      ),
-    );
+    return FutureBuilder(
+        future: UserSession.checkCurrentUser(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data == Status.LoggedIn) {
+              return const DashboardPage();
+            }
+            if (snapshot.data == Status.NotLoggedIn) {
+              return const LoginPage();
+            }
+          } else if (snapshot.hasError) {
+            return const Scaffold(
+              body: SafeArea(
+                child: Center(
+                  child: Image(
+                    image: AssetImage('assets/doctor_t.png'),
+                  ),
+                ),
+              ),
+            );
+          }
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        });
   }
 }

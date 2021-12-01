@@ -63,6 +63,7 @@ class DemoTheme {
   // 3
   static ThemeData light() {
     return ThemeData(
+      primaryColor: const Color(0x000d36c7),
       brightness: Brightness.light,
       checkboxTheme: CheckboxThemeData(
         fillColor: MaterialStateColor.resolveWith(
